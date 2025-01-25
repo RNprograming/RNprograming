@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Quiz Game for Kids</title>
+  <style>
+    /* Basic Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+      background-image: linear-gradient(to top right, #ff7e5f, #feb47b);
+      transition: all 0.3s ease;
+    }
+
+    #game-container {
+      text-align: center;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 80%;
+      max-width: 600px;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #f39c12;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    #question {
+      font-size: 1.5em;
+      margin-top: 20px;
+      color: #2c3e50;
+    }
+
+    #answer {
+      padding: 10px;
+      font-size: 18px;
+      width: 150px;
+      margin: 10px;
+      border-radius: 5px;
+      border: 2px solid #3498db;
+    }
+
+    #feedback {
+      font-size: 1.2em;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+
+    #score, #level {
+      margin-top: 20px;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #2ecc71;
+    }
+
+    #range-input {
+      font-size: 16px;
+      padding: 10px;
+      margin-top: 10px;
+      width: 200px;
+      border-radius: 5px;
+      border: 2px solid #f39c12;
+    }
+
+    #range-feedback {
+      font-size: 16px;
+      margin-top: 10px;
+      color: #e67e22;
+    }
+
+    .button {
+      background-color: #9b59b6;
+      border: none;
+      color: white;
+      padding: 12px 25px;
+      margin: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .button:hover {
+      background-color: #8e44ad;
+    }
+
+    .button.disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .button.enabled {
+      background-color: #27ae60;
+    }
+
+    #operations-container {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .operation-button {
+      background-color: #3498db;
+      border: none;
+      color: white;
+      padding: 12px 25px;
+      margin: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .operation-button:hover {
+      background-color: #2980b9;
+    }
+
+    .operation-button.disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    .operation-button.enabled {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    #progress-bar {
+      margin-top: 20px;
+      width: 100%;
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+    }
+
+    #progress-bar div {
+      height: 100%;
+      width: 0;
+      background-color: #2ecc71;
+      border-radius: 10px;
+    }
+
+    /* Theme Customization */
+    .dark-theme {
+      background-color: #2c3e50;
+      color: #fff;
+    }
+
+    .light-theme {
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    #theme-selection {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>🎉 Welcome to the Math Quiz Game! 🎉</h1>
+
+    <!-- Settings -->
+    <div id="settings">
+      <h2>Select Your Number Range:</h2>
+      <input id="range-input" type="text" placeholder="e.g., 1-4 or 6-8" oninput="checkRange()" />
+      <button class="button disabled" onclick="setRange()" id="set-range-btn" disabled>Set Range</button>
+      <div id="range-feedback"></div>
+
+      <div id="operations-container">
+        <h2>Select Your Math Operation:</h2>
+        <button class="button operation-button disabled" onclick="selectOperation('addition')" id="addition-btn">Addition</button>
+        <button class="button operation-button disabled" onclick="selectOperation('subtraction')" id="subtraction-btn">Subtraction</button>
+        <button class="button operation-button disabled" onclick="selectOperation('multiplication')" id="multiplication-btn">Multiplication</button>
+        <button class="button operation-button disabled" onclick="selectOperation('division')" id="division-btn">Division</button>
+      </div>
+    </div>
+
+    <!-- Theme Selection (Initially Hidden) -->
+    <div id="theme-selection">
+      <h2>Select Theme:</h2>
+      <button class="button" onclick="changeTheme('dark')">Dark Theme</button>
+      <button class="button" onclick="changeTheme('light')">Light Theme</button>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quiz-container" style="display: none;">
+      <p id="question"></p>
+      <input type="number" id="answer" placeholder="Your answer" />
+      <button class="button" onclick="submitAnswer()">Submit Answer</button>
+      <p id="feedback"></p>
+
+      <div id="progress-bar">
+        <div id="progress"></div>
+      </div>
+    </div>
+
+    <p id="score"></p>
+    <p id="level"></p>
+    <p id="high-score"></p>
+
+    <!-- End Game Prompt -->
+    <div id="end-game-container" style="display: none;">
+      <h2>Game Over!</h2>
+      <p>Your score: <span id="final-score"></span></p>
+      <button class="button" onclick="restartGame()">Restart Game</button>
+      <button class="button" onclick="goBackToLobby()">Go Back to Lobby</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let currentOperation = '';
+    let numRangeStart = 1;
+    let numRangeEnd = 4;
+    let correctAnswer = 0;
+    let currentQuestion = '';
+    let questionCount = 0;
+    let level = 1;
+    let highScore = localStorage.getItem('highScore') || 0;
+    let timerInterval;
+    let timeRemaining = 30; 
+
+    // Audio feedback
+    const correctSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
+    const incorrectSound = new Audio('https://www.soundjay.com/button/beep-09.wav');
+
+    function checkRange() {
+      const rangeInput = document.getElementById('range-input').value;
+      const setRangeButton = document.getElementById('set-range-btn');
+      const rangeParts = rangeInput.split('-').map(num => parseInt(num.trim(), 10));
+
+      if (rangeParts.length === 2 && !isNaN(rangeParts[0]) && !isNaN(rangeParts[1]) && rangeParts[0] < rangeParts[1]) {
+        setRangeButton.disabled = false;
+        setRangeButton.style.backgroundColor = '#27ae60';
+        setRangeButton.style.color = 'white';
+        document.getElementById('range-feedback').textContent = `Valid range: ${rangeParts[0]} - ${rangeParts[1]}`;
+        document.getElementById('range-feedback').style.color = 'green';
+      } else {
+        setRangeButton.disabled = true;
+        setRangeButton.style.backgroundColor = '#cccccc';
+        document.getElementById('range-feedback').textContent = 'Please enter a valid range (e.g., 1-4 or 6-8).';
+        document.getElementById('range-feedback').style.color = 'red';
+      }
+    }
+
+    function setRange() {
+      const rangeInput = document.getElementById('range-input').value;
+      const rangeParts = rangeInput.split('-').map(num => parseInt(num.trim(), 10));
+
+      if (rangeParts.length === 2 && !isNaN(rangeParts[0]) && !isNaN(rangeParts[1]) && rangeParts[0] < rangeParts[1]) {
+        numRangeStart = rangeParts[0];
+        numRangeEnd = rangeParts[1];
+
+        // Hide the range input and button
+        document.getElementById('range-input').style.display = 'none';
+        document.getElementById('set-range-btn').style.display = 'none';
+
+        // Show operation selection
+        document.getElementById('operations-container').style.display = 'block';
+
+        // After setting the range, scroll down to the next section
+        scrollDown();
+      }
+    }
+
+    function scrollDown() {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+    function selectOperation(operation) {
+      currentOperation = operation;
+      document.getElementById('operations-container').style.display = 'none';
+      document.getElementById('theme-selection').style.display = 'block';
+    }
+
+    function changeTheme(theme) {
+      document.body.className = theme === 'dark' ? 'dark-theme' : 'light-theme';
+      startGame();
+    }
+
+    function startGame() {
+      document.getElementById('theme-selection').style.display = 'none';
+      document.getElementById('quiz-container').style.display = 'block';
+      generateQuestion();
+      startTimer();
+    }
+
+    function generateQuestion() {
+      if (questionCount >= 10) {
+        endGame();
+        return;
+      }
+
+      const num1 = Math.floor(Math.random() * (numRangeEnd - numRangeStart + 1)) + numRangeStart;
+      const num2 = Math.floor(Math.random() * (numRangeEnd - numRangeStart + 1)) + numRangeStart;
+
+      switch (currentOperation) {
+        case 'addition':
+          correctAnswer = num1 + num2;
+          currentQuestion = `What is ${num1} + ${num2}?`;
+          break;
+        case 'subtraction':
+          correctAnswer = num1 - num2;
+          currentQuestion = `What is ${num1} - ${num2}?`;
+          break;
+        case 'multiplication':
+          correctAnswer = num1 * num2;
+          currentQuestion = `What is ${num1} * ${num2}?`;
+          break;
+        case 'division':
+          const divisor = Math.floor(Math.random() * (numRangeEnd - numRangeStart + 1)) + numRangeStart;
+          num1 = divisor * Math.floor(Math.random() * (numRangeEnd - numRangeStart + 1)) + numRangeStart;
+          correctAnswer = num1 / divisor;
+          currentQuestion = `What is ${num1} ÷ ${divisor}?`;
+          break;
+      }
+
+      document.getElementById('question').innerText = currentQuestion;
+      document.getElementById('answer').value = '';
+      document.getElementById('feedback').innerText = '';
+      document.getElementById('progress').style.width = '0%';
+    }
+
+    function submitAnswer() {
+      const userAnswer = parseInt(document.getElementById('answer').value, 10);
+      if (userAnswer === correctAnswer) {
+        score += 10;
+        correctSound.play();
+        document.getElementById('feedback').innerText = "🎉 Correct! Well done! 🎉";
+        document.getElementById('feedback').style.color = '#27ae60';
+      } else {
+        score -= 5;
+        incorrectSound.play();
+        document.getElementById('feedback').innerText = "Oops! That's not right. Keep trying!";
+        document.getElementById('feedback').style.color = '#e74c3c';
+      }
+
+      document.getElementById('score').innerText = `Score: ${score}`;
+      document.getElementById('level').innerText = `Level: ${level}`;
+
+      questionCount++;
+
+      // Reset the answer field and hide feedback
+      setTimeout(() => {
+        document.getElementById('answer').value = '';
+        document.getElementById('feedback').innerText = '';
+        generateQuestion();
+      }, 1500);
+    }
+
+    function startTimer() {
+      timeRemaining = 30;
+      timerInterval = setInterval(function() {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          submitAnswer();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);  // Stop the timer
+      document.getElementById('quiz-container').style.display = 'none';
+      document.getElementById('end-game-container').style.display = 'block';
+      document.getElementById('final-score').innerText = score;
+    }
+
+    function restartGame() {
+      questionCount = 0;
+      score = 0;
+      document.getElementById('end-game-container').style.display = 'none';
+      document.getElementById('settings').style.display = 'block';
+      document.getElementById('range-input').value = '';
+      document.getElementById('score').innerText = '';
+      document.getElementById('level').innerText = '';
+    }
+
+    function goBackToLobby() {
+      questionCount = 0;
+      score = 0;
+      document.getElementById('end-game-container').style.display = 'none';
+      document.getElementById('settings').style.display = 'block';
+      document.getElementById('range-input').value = '';
+      document.getElementById('score').innerText = '';
+      document.getElementById('level').innerText = '';
+    }
+  </script>
+</body>
+</html>
